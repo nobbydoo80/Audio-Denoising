@@ -22,3 +22,8 @@ Thumbs.db
 audio_denoising_codex_tree.txt
 robocopy_audio_denoising_codex.log
 *_codex/
+# raw audio – keep local
+*.wav
+*.flac
+*.aif
+*.aiff

@@ -27,3 +27,8 @@ robocopy_audio_denoising_codex.log
 *.flac
 *.aif
 *.aiff
+# raw audio – keep local, not in git
+*.wav
+*.flac
+*.aif
+*.aiff

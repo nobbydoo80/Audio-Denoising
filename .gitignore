@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.egg-info/
+.build/
+dist/
+build/
+.venv/
+env/
+.venv*/
+.ipynb_checkpoints/
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Project-specific
+audio_denoising_codex_tree.txt
+robocopy_audio_denoising_codex.log
+*_codex/

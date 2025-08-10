@@ -1,0 +1,445 @@
+# Full Pipeline Configuration - All Phases 1-6
+# Version: 2.0.0
+# Deterministic seeds and comprehensive controls for reproducibility
+
+version: "2.0.0"
+run_id: "run_${timestamp}"  # Will be replaced at runtime
+
+# Global settings
+global:
+  seed: 42
+  deterministic: true
+  strict_mode: false  # If true, fail on missing deps; if false, warn and skip
+  dry_run: false      # If true, plan only without execution
+  cache_dir: .cache
+  checkpoint_interval: 100  # Save checkpoints every N seconds
+  log_level: INFO
+  parallel_phases: false  # Run independent phases in parallel
+  
+# Phase enable/disable flags
+phases:
+  phase1:
+    enabled: true
+    name: "Analysis & Noise Profile"
+  phase2:
+    enabled: true
+    name: "Primary Noise Reduction"
+  phase3:
+    enabled: true
+    name: "HPSS Separation"
+  phase4:
+    enabled: false  # AI wrappers disabled by default
+    name: "AI Enhancement"
+  phase5:
+    enabled: true
+    name: "Artifact Control"
+  phase6:
+    enabled: true
+    name: "Mastering & Normalization"
+  metrics:
+    enabled: true
+    name: "Quality Metrics"
+
+# I/O Configuration
+paths:
+  input: jock_itntvw.wav
+  noise: evilhild_2.wav
+  reference: null  # Optional reference for metrics
+  outputs_dir: outputs/stages
+  reports_dir: reports
+  plots_dir: reports/plots
+  logs_dir: logs
+  metrics_path: reports/metrics.json
+  manifest_path: reports/run_manifest.json
+  final_output: outputs/final_mastered.wav
+  
+# Audio I/O settings
+audio:
+  target_sample_rate: 44100
+  target_bit_depth: 24
+  target_channels: mono  # mono, stereo, or preserve
+  normalize_input: true
+  dither_policy: triangular  # none, rectangular, triangular
+  format_targets:
+    wav:
+      enabled: true
+      bit_depth: 24
+    flac:
+      enabled: false
+      compression_level: 5
+    mp3:
+      enabled: false
+      bitrate: 320
+
+# Phase 1: Analysis (existing)
+analysis:
+  seed: ${global.seed}  # Inherit from global
+  samplerate: 44100
+  stft:
+    n_fft: 2048
+    hop_length: 512
+    win_length: 2048
+    window: hann
+    center: true
+  spectrogram:
+    cmap: "magma"
+    dynamic_range_db: 80
+  child_bands_hz:
+    crying: [300, 600]
+    screaming: [1000, 3000]
+    harmonics: [3000, 4000]
+  vad:
+    enabled: true
+    frame_ms: 30
+    energy_threshold_db: -40
+    hangover_frames: 5
+
+# Phase 1: Noise Profile (existing)
+noise_profile:
+  seed: ${global.seed}
+  percentile_level: 95
+  time_window_s: 0.1
+  smoothing:
+    freq_bins: 5
+    time_frames: 5
+  spectral_floor: 0.1
+  min_floor: 0.05
+  max_ceiling: 0.95
+
+# Phase 2: Wavelet (existing)
+wavelet:
+  seed: ${global.seed}
+  wavelet: db4
+  level: 4
+  thresholding: soft
+  visu_shrink_scale: 0.8
+  preserve_length: true
+  
+# Phase 2: Spectral Subtraction (existing)
+spectral_subtraction:
+  seed: ${global.seed}
+  enabled: true
+  alpha: 2.2
+  beta: 0.1
+  n_fft: 2048
+  hop_length: 512
+  overlap: 0.75
+  smoothing:
+    time: 3
+    freq: 5
+  oversubtraction_factor: 1.5
+  
+# Phase 2: Wiener Filter (existing)
+wiener:
+  seed: ${global.seed}
+  enabled: true
+  update_ms: 20
+  median_kernel_bins: 5
+  noise_estimation_ms: 500
+  vad_guided: true
+  snr_min: 0.1
+  snr_max: 100.0
+  attack_ms: 5
+  release_ms: 50
+
+# Phase 3: HPSS (NEW)
+hpss:
+  seed: ${global.seed}
+  enabled: true
+  method: median  # median, librosa, rpca, deep
+  margin_harmonic: 1.0
+  margin_percussive: 5.0
+  kernel_size: 31
+  power: 2.0
+  mask_type: soft  # soft, hard, binary
+  multiband:
+    enabled: false
+    bands: [[0, 250], [250, 2000], [2000, 8000], [8000, 22050]]
+  preserve_transients: true
+  reversible: true  # Save both components for A/B comparison
+  
+# Phase 4: AI Enhancement (NEW) - Disabled by default
+ai_enhancement:
+  seed: ${global.seed}
+  enabled: false  # Requires ai-extras.txt installation
+  
+  # Speech enhancement
+  speech_enhancement:
+    enabled: false
+    model: "speechbrain/sepformer-wham"  # or custom path
+    device: cpu  # cpu, cuda, mps
+    chunk_size_sec: 10
+    overlap_sec: 1
+    
+  # Demucs source separation
+  demucs:
+    enabled: false
+    model: "htdemucs"  # htdemucs, htdemucs_ft, mdx_extra
+    stems: ["vocals"]  # vocals, drums, bass, other
+    device: cpu
+    shifts: 1  # Number of random shifts for better quality
+    overlap: 0.25
+    
+  # Spleeter separation
+  spleeter:
+    enabled: false
+    model: "2stems"  # 2stems, 4stems, 5stems
+    codec: wav
+    bitrate: 128k
+    
+  # Bandwidth extension
+  bandwidth_extension:
+    enabled: false
+    target_sr: 48000
+    method: sinc  # sinc, neural
+    
+  # Dereverberation
+  dereverb:
+    enabled: false
+    model: null
+    room_size: 0.5
+    
+  # Fallback to classical methods if AI unavailable
+  fallback_classical: true
+  
+# Phase 5: Artifact Control (NEW)
+artifact_control:
+  seed: ${global.seed}
+  enabled: true
+  
+  # Click/pop removal
+  click_removal:
+    enabled: true
+    threshold_db: -20
+    min_duration_ms: 0.5
+    max_duration_ms: 10
+    interpolation: cubic  # linear, cubic, sinc
+    
+  # Musical noise suppression
+  musical_noise:
+    enabled: true
+    method: spectral_floor  # spectral_floor, median_filter, minimum_statistics
+    floor_factor: 0.1
+    median_time: 5
+    median_freq: 3
+    
+  # Transient preservation
+  transient_preservation:
+    enabled: true
+    detection_threshold: 0.3
+    protection_ms: 5
+    blend_factor: 0.7
+    
+  # Pre-echo control
+  pre_echo:
+    enabled: true
+    lookahead_ms: 5
+    threshold: 0.1
+    
+  # De-essing
+  de_ess:
+    enabled: true
+    frequency_range: [4000, 9000]
+    threshold_db: -25
+    ratio: 4
+    attack_ms: 0.5
+    release_ms: 10
+    
+  # Phase coherence
+  phase_coherence:
+    enabled: true
+    method: griffin_lim  # griffin_lim, vocoder
+    iterations: 32
+    
+  # DC offset removal
+  dc_offset:
+    enabled: true
+    method: highpass  # highpass, subtract_mean
+    cutoff_hz: 20
+    
+  # Safety limiter
+  safety_limiter:
+    enabled: true
+    ceiling_db: -0.3
+    release_ms: 50
+    lookahead_ms: 5
+    
+# Phase 6: Mastering (NEW)
+mastering:
+  seed: ${global.seed}
+  enabled: true
+  
+  # LUFS normalization
+  lufs_normalization:
+    enabled: true
+    target_lufs: -16.0  # -14 for streaming, -16 for podcast, -9 for club
+    integrated: true
+    short_term: false
+    momentary: false
+    
+  # True peak limiting
+  true_peak_limiting:
+    enabled: true
+    ceiling_dbtp: -1.0  # dB True Peak
+    release_ms: 50
+    lookahead_ms: 5
+    
+  # Stereo width (if stereo)
+  stereo_width:
+    enabled: false
+    width: 1.0  # 0=mono, 1=normal, >1=wider
+    bass_mono_freq: 120  # Mono below this frequency
+    
+  # EQ
+  eq:
+    enabled: true
+    type: tilt  # tilt, parametric, graphic
+    tilt_db: 0  # Positive=brighter, negative=darker
+    
+  # Dynamic EQ
+  dynamic_eq:
+    enabled: false
+    bands:
+      - freq: 100
+        gain_db: 0
+        q: 0.7
+        threshold_db: -20
+        ratio: 2
+        
+  # Multiband compression
+  multiband_compression:
+    enabled: true
+    bands:
+      - range: [20, 250]
+        threshold_db: -25
+        ratio: 3
+        attack_ms: 10
+        release_ms: 100
+        makeup_db: 0
+      - range: [250, 1000]
+        threshold_db: -20
+        ratio: 2
+        attack_ms: 5
+        release_ms: 50
+        makeup_db: 0
+      - range: [1000, 4000]
+        threshold_db: -20
+        ratio: 2
+        attack_ms: 3
+        release_ms: 30
+        makeup_db: 0
+      - range: [4000, 20000]
+        threshold_db: -25
+        ratio: 3
+        attack_ms: 1
+        release_ms: 20
+        makeup_db: 0
+        
+  # Dithering
+  dithering:
+    enabled: true
+    type: triangular  # none, rectangular, triangular, shaped
+    bit_depth: 16  # Target bit depth
+    noise_shaping: true
+    
+  # Output profiles
+  profiles:
+    streaming:
+      lufs: -14
+      true_peak: -1
+      format: wav
+    podcast:
+      lufs: -16
+      true_peak: -1
+      format: mp3
+    broadcast:
+      lufs: -23
+      true_peak: -1
+      format: wav
+    club:
+      lufs: -9
+      true_peak: -0.3
+      format: wav
+      
+# Metrics Evaluation (NEW)
+metrics:
+  seed: ${global.seed}
+  enabled: true
+  require_reference: false  # If true, skip if no reference provided
+  
+  # SNR
+  snr:
+    enabled: true
+    method: segmental  # global, segmental
+    segment_length_ms: 30
+    
+  # PESQ
+  pesq:
+    enabled: true
+    mode: wb  # nb (narrowband 8kHz), wb (wideband 16kHz)
+    
+  # STOI
+  stoi:
+    enabled: true
+    extended: true  # Use extended STOI
+    
+  # SI-SDR
+  sisdr:
+    enabled: true
+    
+  # Spectral distance
+  spectral_distance:
+    enabled: true
+    method: lsd  # lsd (log-spectral distance), mcd (mel-cepstral distance)
+    
+  # Perceptual metrics
+  perceptual:
+    enabled: false
+    model: null  # Path to custom model
+    
+  # Thresholds for pass/fail
+  thresholds:
+    snr_improvement_db: 15
+    pesq_min: 3.5
+    stoi_min: 0.85
+    sisdr_min: 10
+    
+  # Regression detection
+  regression:
+    enabled: true
+    tolerance_pct: 5
+    baseline_path: null  # Path to baseline metrics
+    
+# Logging and reporting
+logging:
+  level: INFO
+  format: json  # json, text
+  save_plots: true
+  save_intermediate_audio: true
+  save_spectrograms: true
+  save_metrics_per_phase: true
+  
+# Provenance tracking
+provenance:
+  track_versions: true
+  track_hashes: true
+  track_system_info: true
+  track_dependencies: true
+  track_git_info: true
+  
+# Performance
+performance:
+  chunk_size_sec: 30  # Process in chunks for long files
+  overlap_sec: 1
+  max_memory_gb: 8
+  num_workers: 4
+  use_gpu: false
+  
+# Validation
+validation:
+  check_sample_rates: true
+  check_bit_depth: true
+  check_clipping: true
+  max_peak_db: -0.1
+  min_duration_sec: 0.1
+  max_duration_sec: 7200  # 2 hours

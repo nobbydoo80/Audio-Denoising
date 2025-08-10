@@ -1,0 +1,13 @@
+{
+  "input": "outputs/stages\\phase2_wavelet.wav",
+  "output": "outputs/stages\\phase2b_spectral_subtract.wav",
+  "noise_profile": "outputs/stages\\phase1_noise_profile.npz",
+  "alpha": 2.2,
+  "beta": 0.1,
+  "n_fft": 2048,
+  "hop_length": 512,
+  "smoothing": {
+    "time": 3,
+    "freq": 5
+  }
+}

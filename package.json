@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "poetry": "^0.6.29",
+    "toml-checker": "^0.1.3"
+  }
+}

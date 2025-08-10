@@ -1,0 +1,5 @@
+[WARN] Interview SR 44100 != noise SR 48000. Proceeding independently.
+Phase 1 analysis complete. Plots in reports/plots and JSON in logs/.
+
+[elapsed_sec]: 731.228
+[returncode]: 0

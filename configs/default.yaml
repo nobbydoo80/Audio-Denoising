@@ -1,0 +1,96 @@
+# Default configuration extracted from audio_restoration_strategy.md
+# Deterministic seeds for reproducibility
+seed: 42
+
+paths:
+  input: jock_itntvw.wav
+  noise: evilhild_2.wav
+  outputs_dir: outputs/stages
+  reports_dir: reports/plots
+  logs_dir: logs
+  metrics_path: reports/metrics.json
+
+pipeline:
+  phases: [1, 2]  # initial scaffold runs Phases 1–2
+  stop_on_regression: true
+  regression_tolerance_pct: 5
+
+analysis:
+  samplerate: 44100
+  stft:
+    n_fft: 2048
+    hop_length: 512
+    win_length: 2048
+    window: hann
+    center: true
+  spectrogram:
+    cmap: "magma"
+    dynamic_range_db: 80
+  child_bands_hz:
+    crying: [300, 600]
+    screaming: [1000, 3000]
+    harmonics: [3000, 4000]
+  vad:
+    enabled: true
+    frame_ms: 30
+    energy_threshold_db: -40
+    hangover_frames: 5
+
+noise_profile:
+  # Learn time-varying profile from evil sample, with smoothing
+  percentile_level: 95
+  time_window_s: 0.1
+  smoothing:
+    freq_bins: 5
+    time_frames: 5
+  spectral_floor: 0.1
+
+wavelet:
+  # Repository default uses db4, level=2; we expose level control
+  wavelet: db4
+  level: 4
+  thresholding: soft
+  visu_shrink_scale: 0.8  # 0.6–1.0 suggested
+
+spectral_subtraction:
+  enabled: true
+  alpha: 2.2         # 1.8–2.6 recommended for child vocalizations
+  beta: 0.1          # spectral floor as fraction of magnitude
+  n_fft: 2048
+  hop_length: 512
+  overlap: 0.75
+  smoothing:
+    time: 3          # frames
+    freq: 5          # bins
+
+wiener:
+  enabled: true
+  update_ms: 20
+  median_kernel_bins: 5
+  noise_estimation_ms: 500  # from evil child sample head
+  vad_guided: true
+
+freq_gate:
+  enabled: true
+  bands:
+    - [300, 600, -35]    # band_low, band_high, threshold_db
+    - [1000, 3000, -40]
+    - [3000, 4000, -45]
+  attenuation_linear: 0.25 # residual gain within gated bins
+  context_aware: true
+  guard_formants: true
+
+metrics:
+  targets:
+    snr_improvement_db: 15
+    pesq: 3.5
+    stoi: 0.85
+  compute:
+    snr: true
+    pesq: true
+    stoi: true
+
+logging:
+  level: INFO
+  save_plots: true
+  save_intermediate_audio: true

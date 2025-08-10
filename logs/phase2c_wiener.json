@@ -1,0 +1,10 @@
+{
+  "input": "outputs/stages\\phase2b_spectral_subtract.wav",
+  "output": "outputs/stages\\phase2c_wiener.wav",
+  "n_fft": 2048,
+  "hop_length": 512,
+  "median_kernel_bins": 5,
+  "vad_guided": true,
+  "attack_ms": 5,
+  "release_ms": 50
+}

@@ -1,0 +1,10 @@
+{
+  "noise_input": "evilhild_2.wav",
+  "output_npz": "outputs/stages\\phase1_noise_profile.npz",
+  "percentile_level": 95,
+  "spectral_floor": 0.1,
+  "smoothing": {
+    "time_frames": 5,
+    "freq_bins": 5
+  }
+}

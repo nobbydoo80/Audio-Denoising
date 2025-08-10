@@ -1,0 +1,10 @@
+{
+  "input": "jock_itntvw.wav",
+  "output": "outputs/stages\\phase2_wavelet.wav",
+  "wavelet_config_note": "Uses repository defaults (db4, level=2, VisuShrink soft). Exposed level in config but current denoise.py fixes level.",
+  "meta": {
+    "samplerate": 44100,
+    "channels": 2,
+    "format": "WAV"
+  }
+}

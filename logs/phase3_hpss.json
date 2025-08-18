@@ -1,0 +1,30 @@
+{
+  "phase": "3_hpss",
+  "timestamp": "2025-08-18 08:12:28",
+  "seed": 42,
+  "input": "outputs/stages/phase2c_wiener.wav",
+  "outputs": {
+    "harmonic": "outputs/stages/phase3_harmonic.wav",
+    "percussive": "outputs/stages/phase3_percussive.wav",
+    "combined": "outputs/stages/phase3_hpss.wav"
+  },
+  "parameters": {
+    "method": "median",
+    "margin_harmonic": 1.0,
+    "margin_percussive": 5.0,
+    "kernel_size": 31,
+    "power": 2.0,
+    "mask_type": "soft",
+    "multiband": false,
+    "preserve_transients": true
+  },
+  "metrics": {
+    "processing_time_sec": 77.36840391159058,
+    "energy_distribution": {
+      "harmonic_rms": 0.0028607373729628736,
+      "percussive_rms": 0.004201074500108442,
+      "total_rms": 0.00532140828985598,
+      "harmonic_ratio": 0.5375902699774369
+    }
+  }
+}

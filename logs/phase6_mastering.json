@@ -1,0 +1,25 @@
+{
+  "phase": "6_mastering",
+  "timestamp": "2025-08-18 08:29:09",
+  "seed": 42,
+  "input": "outputs/stages/phase5_artifact_controlled.wav",
+  "output": "outputs/stages/final_mastered_podcast.wav",
+  "profile": "podcast",
+  "applied_processes": [
+    "tilt_eq_+0.0dB",
+    "multiband_compression",
+    "lufs_norm_-16",
+    "true_peak_-1dBTP",
+    "dither_16bit"
+  ],
+  "metrics_before": {
+    "lufs": -13.986095076745832,
+    "peak_db": -0.1870194997380557
+  },
+  "metrics_after": {
+    "lufs": -21.098023193332793,
+    "peak_db": -0.9998544867055438,
+    "true_peak_dbtp": -0.9998544867055438
+  },
+  "compliance": {
+    "lufs_target_met": 

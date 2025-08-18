@@ -14,6 +14,9 @@ import platform
 from pathlib import Path
 from datetime import datetime
 
+def script_path(name: str) -> str:
+    return str(Path(__file__).resolve().parent / name)
+
 def get_git_info():
     """Get current git commit and branch info"""
     try:
@@ -148,6 +151,12 @@ def load_config(config_path):
         if field not in cfg:
             raise ValueError(f"Missing required config field: {field}")
     
+    # Normalize noise path key for compatibility with configs using 'noise_sample'
+    paths = cfg.get("paths", {})
+    if "noise" not in paths and "noise_sample" in paths:
+        paths["noise"] = paths["noise_sample"]
+        cfg["paths"] = paths
+    
     return cfg
 
 def create_run_manifest(cfg, args, phase_results):
@@ -278,14 +287,14 @@ def main():
         check_dependencies(1, strict)
         
         result = run_step(
-            ["python", "src\\analyze_audio.py", "--config", args.config],
+            [sys.executable, script_path("analyze_audio.py"), "--config", args.config, "--input", cfg["paths"]["input"], "--noise", cfg["paths"]["noise"]],
             os.path.join(cfg["paths"]["logs_dir"], "phase1_analyze_stdout.log"),
             dry_run
         )
         phase_results["phase1_analyze"] = result
         
         result = run_step(
-            ["python", "src\\noise_profile.py", "--config", args.config],
+            [sys.executable, script_path("noise_profile.py"), "--config", args.config, "--noise", cfg["paths"]["noise"]],
             os.path.join(cfg["paths"]["logs_dir"], "phase1_noise_profile_stdout.log"),
             dry_run
         )
@@ -298,7 +307,7 @@ def main():
         
         # 2a: Wavelet
         result = run_step(
-            ["python", "src\\wavelet_denoise.py", "--config", args.config],
+            [sys.executable, script_path("wavelet_denoise.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase2_wavelet_stdout.log"),
             dry_run
         )
@@ -306,7 +315,7 @@ def main():
         
         # 2b: Spectral Subtraction
         result = run_step(
-            ["python", "src\\spectral_subtract.py", "--config", args.config],
+            [sys.executable, script_path("spectral_subtract.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase2b_spectral_subtract_stdout.log"),
             dry_run
         )
@@ -314,7 +323,7 @@ def main():
         
         # 2c: Wiener Filter
         result = run_step(
-            ["python", "src\\wiener_filter.py", "--config", args.config],
+            [sys.executable, script_path("wiener_filter.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase2c_wiener_stdout.log"),
             dry_run
         )
@@ -326,7 +335,7 @@ def main():
         check_dependencies(3, strict)
         
         result = run_step(
-            ["python", "src\\hpss_separate.py", "--config", args.config],
+            [sys.executable, script_path("hpss_separate.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase3_hpss_stdout.log"),
             dry_run
         )
@@ -339,7 +348,7 @@ def main():
         
         if deps_ok or not strict:
             result = run_step(
-                ["python", "src\\ai_separate.py", "--config", args.config],
+                [sys.executable, script_path("ai_separate.py"), "--config", args.config],
                 os.path.join(cfg["paths"]["logs_dir"], "phase4_ai_stdout.log"),
                 dry_run
             )
@@ -354,7 +363,7 @@ def main():
         check_dependencies(5, strict)
         
         result = run_step(
-            ["python", "src\\artifact_control.py", "--config", args.config],
+            [sys.executable, script_path("artifact_control.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase5_artifact_stdout.log"),
             dry_run
         )
@@ -365,7 +374,7 @@ def main():
         print("\n[PHASE 6] Mastering & Normalization")
         check_dependencies(6, strict)
         
-        cmd = ["python", "src\\mastering_chain.py", "--config", args.config]
+        cmd = [sys.executable, script_path("mastering_chain.py"), "--config", args.config]
         if args.profile:
             cmd.extend(["--profile", args.profile])
         
@@ -381,7 +390,7 @@ def main():
         print("\n[METRICS] Quality Evaluation")
         check_dependencies("metrics", strict)
         
-        cmd = ["python", "src\\metrics_eval.py", "--config", args.config]
+        cmd = [sys.executable, script_path("metrics_eval.py"), "--config", args.config]
         if args.reference:
             cmd.extend(["--reference", args.reference])
         

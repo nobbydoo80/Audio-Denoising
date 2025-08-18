@@ -43,8 +43,8 @@ phases:
     name: "Quality Metrics"
 
 paths:
-  input: data/interview_jock.wav
-  noise_sample: data/evil_child.wav
+  input: /home/nobby/Downloads/interview_jock.wav
+  noise_sample: /home/nobby/qzone/Audio-Denoising/src/evil_child.wav
   reference: null
   outputs_dir: outputs/stages
   reports_dir: reports

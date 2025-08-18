@@ -1,6 +1,6 @@
 {
-  "noise_input": "evilhild_2.wav",
-  "output_npz": "outputs/stages\\phase1_noise_profile.npz",
+  "noise_input": "/home/nobby/qzone/Audio-Denoising/src/evil_child.wav",
+  "output_npz": "outputs/stages/phase1_noise_profile.npz",
   "percentile_level": 95,
   "spectral_floor": 0.1,
   "smoothing": {

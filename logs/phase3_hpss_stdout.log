@@ -1,19 +1,14 @@
-[INFO] Loading input from outputs/stages\phase2c_wiener.wav
+[INFO] Loading input from outputs/stages/phase2c_wiener.wav
 [INFO] Computing STFT...
-[INFO] Applying HPSS (method=librosa)...
+[INFO] Applying HPSS (method=median)...
 [INFO] Reconstructing audio...
 [INFO] Preserving transients...
-Traceback (most recent call last):
-  File "Z:\dev\Audio-Denoising\src\hpss_separate.py", line 339, in <module>
-    main()
-    ~~~~^^
-  File "Z:\dev\Audio-Denoising\src\hpss_separate.py", line 267, in main
-    y_harmonic = preserve_transients(y_harmonic, y_percussive, x,
-                                    threshold=0.3, blend=0.7)
-  File "Z:\dev\Audio-Denoising\src\hpss_separate.py", line 162, in preserve_transients
-    transient_frames = (energy_orig - energy_harm) > threshold * np.max(energy_orig)
-                        ~~~~~~~~~~~~^~~~~~~~~~~~~
-ValueError: operands could not be broadcast together with shapes (41726,) (41722,) 
+[INFO] Saving outputs...
+  - Harmonic: outputs/stages/phase3_harmonic.wav
+  - Percussive: outputs/stages/phase3_percussive.wav
+  - Combined: outputs/stages/phase3_hpss.wav
+[INFO] Phase 3 complete in 77.4s
+[INFO] Energy distribution: H=0.003, P=0.004
 
-[elapsed_sec]: 85.203
-[returncode]: 1
+[elapsed_sec]: 78.670
+[returncode]: 0

@@ -7,6 +7,13 @@
     "dry_run": false,
     "log_level": "INFO"
   },
+  "audio": {
+    "target_sr": 44100,
+    "target_bit_depth": 16,
+    "channels": 1,
+    "normalize_input": true,
+    "max_duration_s": null
+  },
   "phases": {
     "phase1": {
       "enabled": true,
@@ -21,7 +28,7 @@
       "name": "HPSS Separation"
     },
     "phase4": {
-      "enabled": true,
+      "enabled": false,
       "name": "AI Enhancement"
     },
     "phase5": {
@@ -38,15 +45,16 @@
     }
   },
   "paths": {
-    "input": "jock_itntvw.wav",
-    "noise": "evilhild_2.wav",
+    "input": "data/interview_jock.wav",
+    "noise_sample": "data/evil_child.wav",
     "reference": null,
     "outputs_dir": "outputs/stages",
     "reports_dir": "reports",
     "logs_dir": "logs",
     "metrics_path": "reports/metrics.json",
     "manifest_path": "reports/run_manifest.json",
-    "final_output": "outputs/final_mastered_ai.wav"
+    "final_output": "outputs/final_mastered.wav",
+    "noise": "data/evil_child.wav"
   },
   "analysis": {
     "samplerate": 44100,
@@ -115,7 +123,7 @@
   },
   "hpss": {
     "enabled": true,
-    "method": "librosa",
+    "method": "median",
     "margin_harmonic": 1.0,
     "margin_percussive": 5.0,
     "kernel_size": 31,
@@ -123,42 +131,6 @@
     "mask_type": "soft",
     "preserve_transients": true,
     "reversible": true
-  },
-  "ai_enhancement": {
-    "enabled": true,
-    "speech_enhancement": {
-      "enabled": true,
-      "model": "speechbrain/sepformer-wham",
-      "device": "cpu",
-      "chunk_size_sec": 10,
-      "overlap_sec": 1
-    },
-    "demucs": {
-      "enabled": true,
-      "model": "htdemucs",
-      "stems": [
-        "vocals"
-      ],
-      "device": "cpu",
-      "shifts": 1,
-      "overlap": 0.25
-    },
-    "spleeter": {
-      "enabled": false,
-      "model": "2stems",
-      "codec": "wav",
-      "bitrate": "128k"
-    },
-    "bandwidth_extension": {
-      "enabled": true,
-      "target_sr": 48000,
-      "method": "sinc"
-    },
-    "dereverb": {
-      "enabled": true,
-      "room_size": 0.5
-    },
-    "fallback_classical": true
   },
   "artifact_control": {
     "enabled": true,
@@ -169,9 +141,8 @@
     },
     "musical_noise": {
       "enabled": true,
-      "method": "median_filter",
-      "median_time": 5,
-      "median_freq": 3
+      "method": "spectral_floor",
+      "floor_factor": 0.1
     },
     "transient_preservation": {
       "enabled": true,
@@ -200,45 +171,24 @@
     },
     "safety_limiter": {
       "enabled": true,
-      "ceiling_dbtp": -1.0,
-      "release_ms": 50,
-      "lookahead_ms": 5,
-      "enable_bypass": false
+      "ceiling_db": -0.3
     }
   },
   "mastering": {
     "enabled": true,
     "lufs_normalization": {
       "enabled": true,
-      "target_lufs": -14.0
+      "target_lufs": -16.0
     },
     "true_peak_limiting": {
       "enabled": true,
       "ceiling_dbtp": -1.0,
-      "release_ms": 50,
-      "lookahead_ms": 5
-    },
-    "stereo_width": {
-      "enabled": false,
-      "width": 1.0,
-      "bass_mono_freq": 120
+      "release_ms": 50
     },
     "eq": {
       "enabled": true,
       "type": "tilt",
-      "tilt_db": 1.0
-    },
-    "dynamic_eq": {
-      "enabled": true,
-      "bands": [
-        {
-          "freq": 3000,
-          "gain_db": 2,
-          "q": 0.7,
-          "threshold_db": -20,
-          "ratio": 2
-        }
-      ]
+      "tilt_db": 0
     },
     "multiband_compression": {
       "enabled": true,
@@ -270,11 +220,11 @@
             1000,
             4000
           ],
-          "threshold_db": -18,
+          "threshold_db": -20,
           "ratio": 2,
           "attack_ms": 3,
           "release_ms": 30,
-          "makeup_db": 1
+          "makeup_db": 0
         },
         {
           "range": [
@@ -291,9 +241,8 @@
     },
     "dithering": {
       "enabled": true,
-      "type": "shaped",
-      "bit_depth": 24,
-      "noise_shaping": true
+      "type": "triangular",
+      "bit_depth": 16
     },
     "profiles": {
       "streaming": {
@@ -303,11 +252,6 @@
       },
       "podcast": {
         "lufs": -16,
-        "true_peak": -1,
-        "format": "mp3"
-      },
-      "broadcast": {
-        "lufs": -23,
         "true_peak": -1,
         "format": "wav"
       }
@@ -336,49 +280,26 @@
       "enabled": true,
       "method": "lsd"
     },
-    "perceptual": {
-      "enabled": false,
-      "model": null
-    },
     "thresholds": {
-      "snr_improvement_db": 20,
-      "pesq_min": 4.0,
-      "stoi_min": 0.9,
-      "sisdr_min": 15
+      "snr_improvement_db": 15,
+      "pesq_min": 3.5,
+      "stoi_min": 0.85,
+      "sisdr_min": 10
     },
     "regression": {
       "enabled": true,
-      "tolerance_pct": 3
+      "tolerance_pct": 5
     }
   },
   "logging": {
     "level": "INFO",
-    "format": "json",
     "save_plots": true,
     "save_intermediate_audio": true,
-    "save_spectrograms": true,
     "save_metrics_per_phase": true
   },
   "provenance": {
     "track_versions": true,
     "track_hashes": true,
-    "track_system_info": true,
-    "track_dependencies": true,
-    "track_git_info": true
-  },
-  "performance": {
-    "chunk_size_sec": 30,
-    "overlap_sec": 1,
-    "max_memory_gb": 8,
-    "num_workers": 4,
-    "use_gpu": false
-  },
-  "validation": {
-    "check_sample_rates": true,
-    "check_bit_depth": true,
-    "check_clipping": true,
-    "max_peak_db": -0.1,
-    "min_duration_sec": 0.1,
-    "max_duration_sec": 7200
+    "track_system_info": true
   }
 }

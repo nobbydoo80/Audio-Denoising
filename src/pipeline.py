@@ -52,26 +52,26 @@ def main():
     # Phase 1: Initial analysis + noise profile
     if "1" in selected:
         run_step(
-            ["python", "src\\analyze_audio.py", "--config", args.config, "--input", cfg["paths"]["input"], "--noise", cfg["paths"]["noise"]],
+            [sys.executable, str(Path(__file__).resolve().parent / "analyze_audio.py"), "--config", args.config, "--input", cfg["paths"]["input"], "--noise", cfg["paths"]["noise"]],
             os.path.join(cfg["paths"]["logs_dir"], "phase1_analyze_stdout.log")
         )
         run_step(
-            ["python", "src\\noise_profile.py", "--config", args.config, "--noise", cfg["paths"]["noise"]],
+            [sys.executable, str(Path(__file__).resolve().parent / "noise_profile.py"), "--config", args.config, "--noise", cfg["paths"]["noise"]],
             os.path.join(cfg["paths"]["logs_dir"], "phase1_noise_profile_stdout.log")
         )
 
     # Phase 2: Primary noise reduction (wavelet -> spectral subtraction -> Wiener)
     if "2" in selected:
         run_step(
-            ["python", "src\\wavelet_denoise.py", "--config", args.config, "--input", cfg["paths"]["input"]],
+            [sys.executable, str(Path(__file__).resolve().parent / "wavelet_denoise.py"), "--config", args.config, "--input", cfg["paths"]["input"]],
             os.path.join(cfg["paths"]["logs_dir"], "phase2_wavelet_stdout.log")
         )
         run_step(
-            ["python", "src\\spectral_subtract.py", "--config", args.config],
+            [sys.executable, str(Path(__file__).resolve().parent / "spectral_subtract.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase2b_spectral_subtract_stdout.log")
         )
         run_step(
-            ["python", "src\\wiener_filter.py", "--config", args.config],
+            [sys.executable, str(Path(__file__).resolve().parent / "wiener_filter.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase2c_wiener_stdout.log")
         )
 

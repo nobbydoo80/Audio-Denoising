@@ -1,0 +1,69 @@
+{
+  "phase": "5_artifact_control",
+  "timestamp": "2025-08-18 08:19:09",
+  "seed": 42,
+  "input": "outputs/stages/phase3_hpss.wav",
+  "output": "outputs/stages/phase5_artifact_controlled.wav",
+  "applied_processes": [
+    "click_removal",
+    "musical_noise_suppression",
+    "transient_preservation",
+    "pre_echo_control",
+    "de_essing",
+    "phase_coherence",
+    "dc_offset_removal",
+    "safety_limiter"
+  ],
+  "metrics": {
+    "clicks_removed": 4,
+    "transient_ratio": 0.40451511629300324,
+    "dc_offset_removed": -0.003115406939519703,
+    "peaks_limited": 0,
+    "peak_level_db": -0.18699606693492565,
+    "rms_level_db": -18.82479795134935,
+    "crest_factor_db": 18.63780188362854
+  },
+  "configuration": {
+    "enabled": true,
+    "click_removal": {
+      "enabled": true,
+      "threshold_db": -20,
+      "interpolation": "cubic"
+    },
+    "musical_noise": {
+      "enabled": true,
+      "method": "spectral_floor",
+      "floor_factor": 0.1
+    },
+    "transient_preservation": {
+      "enabled": true,
+      "detection_threshold": 0.3
+    },
+    "pre_echo": {
+      "enabled": true,
+      "lookahead_ms": 5
+    },
+    "de_ess": {
+      "enabled": true,
+      "frequency_range": [
+        4000,
+        9000
+      ],
+      "threshold_db": -25
+    },
+    "phase_coherence": {
+      "enabled": true,
+      "method": "griffin_lim",
+      "iterations": 32
+    },
+    "dc_offset": {
+      "enabled": true,
+      "method": "highpass"
+    },
+    "safety_limiter": {
+      "enabled": true,
+      "ceiling_db": -0.3
+    }
+  },
+  "processing_time_sec": 398.66345596313477
+}

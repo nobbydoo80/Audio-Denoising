@@ -29,7 +29,12 @@ def main():
     with open(args.config, "r") as f:
         cfg = yaml.safe_load(f)
 
-    noise_path = args.noise or cfg["paths"]["noise"]
+    # Support both 'noise' and 'noise_sample'
+    paths = cfg.get("paths", {})
+    noise_key = "noise" if "noise" in paths else ("noise_sample" if "noise_sample" in paths else None)
+    if noise_key is None:
+        raise KeyError("Config missing paths.noise or paths.noise_sample")
+    noise_path = args.noise or paths[noise_key]
     outputs_dir = cfg["paths"]["outputs_dir"]
     logs_dir = cfg["paths"]["logs_dir"]
     reports_dir = cfg["paths"]["reports_dir"]

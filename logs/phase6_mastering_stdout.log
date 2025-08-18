@@ -1,0 +1,36 @@
+[INFO] Loading outputs/stages/phase5_artifact_controlled.wav
+[INFO] Mastering with profile 'podcast': LUFS=-16, True Peak=-1 dBTP
+[INFO] Applying EQ...
+[INFO] Applying multiband compression...
+[INFO] Normalizing to target LUFS...
+[INFO] Current LUFS: -21.1, Target: -16.0, Gain: 5.1 dB
+[INFO] Applying true peak limiting...
+[INFO] True peak limiting: -0.1 dBTP -> -1.0 dBTP
+[INFO] Applying dither for 16-bit output...
+[INFO] Saving mastered audio to outputs/stages/final_mastered_podcast.wav
+[INFO] Also saved to outputs/final_mastered.wav
+Traceback (most recent call last):
+  File "/home/nobby/qzone/Audio-Denoising/src/mastering_chain.py", line 574, in <module>
+    main()
+    ~~~~^^
+  File "/home/nobby/qzone/Audio-Denoising/src/mastering_chain.py", line 566, in main
+    json.dump(log_data, f, indent=2)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/linuxbrew/.linuxbrew/opt/python@3.13/lib/python3.13/json/__init__.py", line 179, in dump
+    for chunk in iterable:
+                 ^^^^^^^^
+  File "/home/linuxbrew/.linuxbrew/opt/python@3.13/lib/python3.13/json/encoder.py", line 433, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/home/linuxbrew/.linuxbrew/opt/python@3.13/lib/python3.13/json/encoder.py", line 407, in _iterencode_dict
+    yield from chunks
+  File "/home/linuxbrew/.linuxbrew/opt/python@3.13/lib/python3.13/json/encoder.py", line 407, in _iterencode_dict
+    yield from chunks
+  File "/home/linuxbrew/.linuxbrew/opt/python@3.13/lib/python3.13/json/encoder.py", line 440, in _iterencode
+    o = _default(o)
+  File "/home/linuxbrew/.linuxbrew/opt/python@3.13/lib/python3.13/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+                    f'is not JSON serializable')
+TypeError: Object of type bool is not JSON serializable
+
+[elapsed_sec]: 512.247
+[returncode]: 1

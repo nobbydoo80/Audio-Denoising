@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import argparse, json, os, random
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import soundfile as sf
 import matplotlib.pyplot as plt
 from scipy.signal import stft
@@ -74,10 +76,19 @@ def main():
     set_seed(seed)
 
     input_path = args.input or cfg["paths"]["input"]
-    noise_path = args.noise or cfg["paths"]["noise"]
+    # Support both 'noise' and 'noise_sample'
+    paths = cfg.get("paths", {})
+    noise_key = "noise" if "noise" in paths else ("noise_sample" if "noise_sample" in paths else None)
+    if noise_key is None:
+        raise KeyError("Config missing paths.noise or paths.noise_sample")
+    noise_path = args.noise or paths[noise_key]
     out_dir = cfg["paths"]["outputs_dir"]
     rep_dir = cfg["paths"]["reports_dir"]
     logs_dir = cfg["paths"]["logs_dir"]
+
+    print(f"[DEBUG] CWD: {os.getcwd()}")
+    print(f"[DEBUG] input_path: {input_path}")
+    print(f"[DEBUG] noise_path: {noise_path}")
     ensure_dirs([out_dir, rep_dir, logs_dir])
 
     sr_cfg = cfg["analysis"].get("samplerate", None)

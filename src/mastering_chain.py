@@ -563,7 +563,7 @@ def main():
     
     log_path = os.path.join(logs_dir, "phase6_mastering.json")
     with open(log_path, "w") as f:
-        json.dump(log_data, f, indent=2)
+        json.dump(log_data, f, indent=2, default=str)
     
     print(f"[INFO] Phase 6 complete in {dt:.1f}s")
     print(f"[INFO] Final LUFS: {lufs_after:.1f} (target: {target_lufs})")

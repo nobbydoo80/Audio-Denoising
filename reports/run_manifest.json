@@ -1,0 +1,84 @@
+{
+  "version": "2.0.0",
+  "run_id": "run_1755460254",
+  "timestamp": "2025-08-17T19:50:54.434993Z",
+  "configuration": {
+    "config_file": "/home/nobby/qzone/Audio-Denoising/configs/full_no_ai.yaml",
+    "config_hash": "cf5cd38bbc306294268cfe7f73dce79caf67054c44ec83027db093a08a057e87",
+    "seed": 42,
+    "phases_requested": [],
+    "dry_run": true,
+    "strict_mode": false
+  },
+  "inputs": {
+    "audio": {
+      "path": "data/interview_jock.wav",
+      "hash": null
+    },
+    "noise": {
+      "path": "data/evil_child.wav",
+      "hash": null
+    }
+  },
+  "system": {
+    "platform": "Linux-6.14.0-27-generic-x86_64-with-glibc2.41",
+    "python_version": "3.13.5",
+    "processor": "x86_64",
+    "hostname": "nobby-hpprobook640g1",
+    "timestamp": "2025-08-17T19:50:54.454597Z"
+  },
+  "git": {
+    "branch": "main",
+    "commit": "2698179e"
+  },
+  "phases": {
+    "phase1_analyze": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "phase1_noise_profile": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "phase2_wavelet": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "phase2b_spectral_subtract": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "phase2c_wiener": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "phase3_hpss": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "phase5_artifact": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "phase6_mastering": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
+    "metrics": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    }
+  },
+  "outputs": {},
+  "metrics": {},
+  "total_elapsed_sec": 0
+}

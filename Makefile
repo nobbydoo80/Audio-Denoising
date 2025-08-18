@@ -9,7 +9,8 @@
 #   make dry-run      # Test pipeline without execution
 #   make clean        # Remove outputs and logs
 
-PY=python
+SHELL := /bin/bash
+PY=python3
 VENV?=.venv
 
 # Default config files
@@ -49,6 +50,7 @@ help:
 	@echo "Utilities:"
 	@echo "  make clean        - Remove all outputs and logs"
 	@echo "  make metrics      - Run metrics evaluation only"
+	@echo "  make run-core-fast - Run minimal core DSP (no analysis)"
 	@echo ""
 	@echo "Options (set via command line):"
 	@echo "  INPUT=<file>      - Input audio file (default: jock_itntvw.wav)"
@@ -76,34 +78,38 @@ install-ai:
 	@echo "For GPU support, install PyTorch with CUDA separately."
 
 run-core:
-	$(PY) src\\pipeline_v2.py --config $(CFG_CORE) \
+	$(PY) src/pipeline_v2.py --config $(CFG_CORE) \
 		--input $(INPUT) --noise $(NOISE) \
 		--phases 1,2
 
 run-full:
-	$(PY) src\\pipeline_v2.py --config $(CFG_FULL) \
+	$(PY) src/pipeline_v2.py --config $(CFG_FULL) \
 		--input $(INPUT) --noise $(NOISE) \
 		--phases all --profile $(PROFILE)
 
 run-ai:
-	$(PY) src\\pipeline_v2.py --config $(CFG_AI) \
+	$(PY) src/pipeline_v2.py --config $(CFG_AI) \
 		--input $(INPUT) --noise $(NOISE) \
 		--phases all --profile $(PROFILE)
 
+run-core-fast:
+	$(PY) src/core_pipeline.py --config $(CFG_CORE) \
+		--input $(INPUT) --noise $(NOISE)
+
 run-custom:
-	$(PY) src\\pipeline_v2.py --config configs\\full_pipeline.yaml \
+	$(PY) src/pipeline_v2.py --config configs/full_pipeline.yaml \
 		--input $(INPUT) --noise $(NOISE) \
 		--phases $(PHASES) --profile $(PROFILE) \
 		$(if $(filter true,$(STRICT)),--strict) \
 		$(if $(filter true,$(DRY_RUN)),--dry-run)
 
 dry-run:
-	$(PY) src\\pipeline_v2.py --config $(CFG_FULL) \
+	$(PY) src/pipeline_v2.py --config $(CFG_FULL) \
 		--input $(INPUT) --noise $(NOISE) \
 		--phases all --dry-run
 
 metrics:
-	$(PY) src\\metrics_eval.py --config $(CFG_FULL) \
+	$(PY) src/metrics_eval.py --config $(CFG_FULL) \
 		$(if $(REFERENCE),--reference $(REFERENCE))
 
 test:
@@ -111,20 +117,15 @@ test:
 	$(PY) -m pytest tests/ -v
 
 clean:
-	@if exist outputs rmdir /s /q outputs
-	@if exist logs rmdir /s /q logs
-	@if exist reports rmdir /s /q reports
-	@if exist .cache rmdir /s /q .cache
-	@if exist __pycache__ rmdir /s /q __pycache__
-	@if exist src\\__pycache__ rmdir /s /q src\\__pycache__
+	rm -rf outputs logs reports .cache __pycache__ src/__pycache__
 	@echo "Cleaned outputs, logs, reports, and cache."
 
 # Development targets
 dev-setup:
 	$(PY) -m venv $(VENV)
-	"$(VENV)\\Scripts\\pip" install --upgrade pip
-	"$(VENV)\\Scripts\\pip" install -r requirements.txt
-	"$(VENV)\\Scripts\\pip" install pytest black flake8
+	$(VENV)/bin/python -m pip install --upgrade pip
+	$(VENV)/bin/python -m pip install -r requirements.txt
+	$(VENV)/bin/python -m pip install pytest black flake8
 	@echo "Development environment ready in $(VENV)"
 
 format:
@@ -135,7 +136,7 @@ lint:
 
 # Quick test runs
 quick-test:
-	$(PY) src\\pipeline_v2.py --config $(CFG_CORE) \
+	$(PY) src/pipeline_v2.py --config $(CFG_CORE) \
 		--phases 1 --dry-run
 
 benchmark:

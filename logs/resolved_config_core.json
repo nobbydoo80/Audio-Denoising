@@ -1,0 +1,135 @@
+{
+  "version": "2.0.0",
+  "global": {
+    "seed": 42,
+    "deterministic": true,
+    "strict_mode": false,
+    "dry_run": false,
+    "log_level": "INFO"
+  },
+  "audio": {
+    "target_sr": 44100,
+    "target_bit_depth": 16,
+    "channels": 1,
+    "normalize_input": true,
+    "max_duration_s": null
+  },
+  "phases": {
+    "phase1": {
+      "enabled": true,
+      "name": "Analysis & Noise Profile"
+    },
+    "phase2": {
+      "enabled": true,
+      "name": "Primary Noise Reduction"
+    },
+    "phase3": {
+      "enabled": false,
+      "name": "HPSS Separation"
+    },
+    "phase4": {
+      "enabled": false,
+      "name": "AI Enhancement"
+    },
+    "phase5": {
+      "enabled": false,
+      "name": "Artifact Control"
+    },
+    "phase6": {
+      "enabled": false,
+      "name": "Mastering & Normalization"
+    },
+    "metrics": {
+      "enabled": false,
+      "name": "Quality Metrics"
+    }
+  },
+  "paths": {
+    "input": "/home/nobby/Downloads/interview_jock.wav",
+    "noise_sample": "/home/nobby/qzone/Audio-Denoising/src/evil_child.wav",
+    "reference": null,
+    "outputs_dir": "outputs/stages",
+    "reports_dir": "reports",
+    "logs_dir": "logs",
+    "metrics_path": "reports/metrics.json",
+    "manifest_path": "reports/run_manifest.json",
+    "final_output": "outputs/phase2c_wiener.wav",
+    "noise": "/home/nobby/qzone/Audio-Denoising/src/evil_child.wav"
+  },
+  "analysis": {
+    "samplerate": 44100,
+    "stft": {
+      "n_fft": 2048,
+      "hop_length": 512,
+      "win_length": 2048,
+      "window": "hann",
+      "center": true
+    },
+    "spectrogram": {
+      "cmap": "magma",
+      "dynamic_range_db": 80
+    },
+    "child_bands_hz": {
+      "crying": [
+        300,
+        600
+      ],
+      "screaming": [
+        1000,
+        3000
+      ],
+      "harmonics": [
+        3000,
+        4000
+      ]
+    },
+    "vad": {
+      "enabled": true,
+      "frame_ms": 30,
+      "energy_threshold_db": -40
+    }
+  },
+  "noise_profile": {
+    "percentile_level": 95,
+    "time_window_s": 0.1,
+    "smoothing": {
+      "freq_bins": 5,
+      "time_frames": 5
+    },
+    "spectral_floor": 0.1
+  },
+  "wavelet": {
+    "wavelet": "db4",
+    "level": 4,
+    "thresholding": "soft",
+    "visu_shrink_scale": 0.8
+  },
+  "spectral_subtraction": {
+    "enabled": true,
+    "alpha": 2.2,
+    "beta": 0.1,
+    "n_fft": 2048,
+    "hop_length": 512,
+    "smoothing": {
+      "time": 3,
+      "freq": 5
+    }
+  },
+  "wiener": {
+    "enabled": true,
+    "update_ms": 20,
+    "median_kernel_bins": 5,
+    "vad_guided": true
+  },
+  "logging": {
+    "level": "INFO",
+    "save_plots": true,
+    "save_intermediate_audio": true,
+    "save_metrics_per_phase": false
+  },
+  "provenance": {
+    "track_versions": true,
+    "track_hashes": true,
+    "track_system_info": true
+  }
+}

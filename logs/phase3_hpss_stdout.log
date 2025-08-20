@@ -1,14 +1,14 @@
-[INFO] Loading input from outputs/stages/phase2c_wiener.wav
+[INFO] Loading input from /home/nobby/qzone/Audio-Denoising/outputs/stages/phase2c_wiener.wav
 [INFO] Computing STFT...
 [INFO] Applying HPSS (method=median)...
 [INFO] Reconstructing audio...
 [INFO] Preserving transients...
 [INFO] Saving outputs...
-  - Harmonic: outputs/stages/phase3_harmonic.wav
-  - Percussive: outputs/stages/phase3_percussive.wav
-  - Combined: outputs/stages/phase3_hpss.wav
-[INFO] Phase 3 complete in 77.4s
+  - Harmonic: /home/nobby/qzone/Audio-Denoising/outputs/stages/phase3_harmonic.wav
+  - Percussive: /home/nobby/qzone/Audio-Denoising/outputs/stages/phase3_percussive.wav
+  - Combined: /home/nobby/qzone/Audio-Denoising/outputs/stages/phase3_hpss.wav
+[INFO] Phase 3 complete in 63.1s
 [INFO] Energy distribution: H=0.003, P=0.004
 
-[elapsed_sec]: 78.670
+[elapsed_sec]: 64.528
 [returncode]: 0

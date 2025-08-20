@@ -1,0 +1,4 @@
+# Optional metrics dependencies
+pesq>=0.0.4
+pystoi>=0.3.3
+pyloudnorm>=0.1.1

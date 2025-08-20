@@ -1,0 +1,14 @@
+# Optional AI dependencies (install only if using Phase 4)
+# CUDA builds of torch/torchaudio are recommended if you have a GPU
+
+# PyTorch (CPU wheels for Python >=3.10). For CUDA, follow pytorch.org instructions instead.
+torch>=2.2
+torchaudio>=2.2
+
+# Source separation/enhancement
+demucs>=4.0
+speechbrain>=1.0
+
+# Audio IO helpers
+soundfile>=0.12
+ffmpeg-python>=0.2.0

@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Phase 4: AI-Based Enhancement (Optional)
-Provides wrappers for Demucs, Spleeter, and other AI models
-All AI features are disabled by default and require ai-extras.txt installation
+Provides wrappers for Demucs and SpeechBrain (Spleeter removed)
+All AI features are disabled by default; install requirements-ai.txt to enable
 """
 import argparse
 import os
@@ -28,11 +28,6 @@ def set_seed(seed: int):
             torch.cuda.manual_seed_all(seed)
     except ImportError:
         pass
-    try:
-        import tensorflow as tf
-        tf.random.set_seed(seed)
-    except ImportError:
-        pass
 
 def ensure_dirs(paths):
     """Create directories if they don't exist"""
@@ -43,39 +38,25 @@ def check_dependencies():
     """Check which AI dependencies are available"""
     deps = {
         "demucs": False,
-        "spleeter": False,
         "speechbrain": False,
         "torch": False,
-        "tensorflow": False
     }
     
     try:
-        import demucs
+        import demucs  # noqa: F401
         deps["demucs"] = True
     except ImportError:
         pass
     
     try:
-        import spleeter
-        deps["spleeter"] = True
-    except ImportError:
-        pass
-    
-    try:
-        import speechbrain
+        import speechbrain  # noqa: F401
         deps["speechbrain"] = True
     except ImportError:
         pass
     
     try:
-        import torch
+        import torch  # noqa: F401
         deps["torch"] = True
-    except ImportError:
-        pass
-    
-    try:
-        import tensorflow
-        deps["tensorflow"] = True
     except ImportError:
         pass
     
@@ -89,7 +70,6 @@ def apply_demucs(input_path, output_dir, model="htdemucs", stems=["vocals"],
     Returns path to separated vocal stem
     """
     try:
-        import demucs.separate
         import torch
         
         # Set device
@@ -133,49 +113,10 @@ def apply_demucs(input_path, output_dir, model="htdemucs", stems=["vocals"],
             return None
             
     except ImportError:
-        print("[WARN] Demucs not available. Install with: pip install demucs")
+        print("[WARN] Demucs not available. Install with: pip install -r requirements-ai.txt")
         return None
     except Exception as e:
         print(f"[ERROR] Demucs failed: {e}")
-        return None
-
-def apply_spleeter(input_path, output_dir, model="2stems", codec="wav", bitrate="128k"):
-    """
-    Apply Spleeter source separation
-    
-    Returns path to separated vocal stem
-    """
-    try:
-        from spleeter.separator import Separator
-        from spleeter.audio.adapter import AudioAdapter
-        
-        # Initialize separator
-        separator = Separator(f'spleeter:{model}')
-        audio_adapter = AudioAdapter.default()
-        
-        # Load audio
-        waveform, sample_rate = audio_adapter.load(input_path)
-        
-        # Perform separation
-        prediction = separator.separate(waveform)
-        
-        # Save vocals
-        output_path = os.path.join(output_dir, "spleeter_vocals.wav")
-        
-        if 'vocals' in prediction:
-            vocals = prediction['vocals']
-            # Save using soundfile for consistency
-            sf.write(output_path, vocals.T, sample_rate)
-            return output_path
-        else:
-            print("[ERROR] No vocals in Spleeter output")
-            return None
-            
-    except ImportError:
-        print("[WARN] Spleeter not available. Install with: pip install spleeter")
-        return None
-    except Exception as e:
-        print(f"[ERROR] Spleeter failed: {e}")
         return None
 
 def apply_speech_enhancement(input_path, output_path, model="speechbrain/sepformer-wham",
@@ -225,7 +166,7 @@ def apply_speech_enhancement(input_path, output_path, model="speechbrain/sepform
         return output_path
         
     except ImportError:
-        print("[WARN] SpeechBrain not available. Install with: pip install speechbrain")
+        print("[WARN] SpeechBrain not available. Install with: pip install -r requirements-ai.txt")
         return None
     except Exception as e:
         print(f"[ERROR] Speech enhancement failed: {e}")
@@ -379,7 +320,8 @@ def main():
     # Setup paths
     outputs_dir = cfg["paths"]["outputs_dir"]
     logs_dir = cfg["paths"]["logs_dir"]
-    ensure_dirs([outputs_dir, logs_dir])
+    Path(outputs_dir).mkdir(parents=True, exist_ok=True)
+    Path(logs_dir).mkdir(parents=True, exist_ok=True)
     
     # Determine input
     prefer = [
@@ -398,108 +340,53 @@ def main():
     print(f"[INFO] Processing {in_path}")
     t0 = time.time()
     
-    # Track what was applied
-    applied_methods = []
-    current_path = in_path
-    temp_dir = os.path.join(outputs_dir, "ai_temp")
-    ensure_dirs([temp_dir])
+    demucs_done = False
+    speech_enh_done = False
+    enhanced_path = None
+    if deps.get("demucs"):
+        enhanced_path = apply_demucs(in_path, os.path.join(outputs_dir, "demucs"),
+                                     model=ai_cfg.get("demucs_model", "htdemucs"),
+                                     device=ai_cfg.get("device", "cpu"),
+                                     shifts=ai_cfg.get("demucs_shifts", 1),
+                                     overlap=ai_cfg.get("demucs_overlap", 0.25),
+                                     seed=seed)
+        demucs_done = enhanced_path is not None
     
-    # 1. Speech Enhancement
-    if ai_cfg.get("speech_enhancement", {}).get("enabled", False):
-        if deps["speechbrain"]:
-            print("[INFO] Applying speech enhancement...")
-            temp_out = os.path.join(temp_dir, "speech_enhanced.wav")
-            result = apply_speech_enhancement(
-                current_path, temp_out,
-                model=ai_cfg["speech_enhancement"].get("model"),
-                device=ai_cfg["speech_enhancement"].get("device", "cpu"),
-                chunk_size_sec=ai_cfg["speech_enhancement"].get("chunk_size_sec", 10)
-            )
-            if result:
-                current_path = result
-                applied_methods.append("speech_enhancement")
-        elif fallback:
-            print("[INFO] SpeechBrain not available, using classical fallback")
-            temp_out = os.path.join(temp_dir, "classical_enhanced.wav")
-            result = classical_fallback(current_path, temp_out, "vocals")
-            if result:
-                current_path = result
-                applied_methods.append("classical_vocal_isolation")
+    # Speech enhancement (optional)
+    if not demucs_done and deps.get("speechbrain"):
+        enhanced_path = apply_speech_enhancement(in_path, out_path,
+                                                 model=ai_cfg.get("speechbrain_model", "speechbrain/sepformer-wham"),
+                                                 device=ai_cfg.get("device", "cpu"))
+        speech_enh_done = enhanced_path is not None
     
-    # 2. Demucs Source Separation
-    if ai_cfg.get("demucs", {}).get("enabled", False):
-        if deps["demucs"]:
-            print("[INFO] Applying Demucs source separation...")
-            result = apply_demucs(
-                current_path, temp_dir,
-                model=ai_cfg["demucs"].get("model", "htdemucs"),
-                stems=ai_cfg["demucs"].get("stems", ["vocals"]),
-                device=ai_cfg["demucs"].get("device", "cpu"),
-                shifts=ai_cfg["demucs"].get("shifts", 1),
-                overlap=ai_cfg["demucs"].get("overlap", 0.25),
-                seed=seed
-            )
-            if result:
-                current_path = result
-                applied_methods.append("demucs")
-        elif fallback:
-            print("[INFO] Demucs not available, using classical fallback")
-            temp_out = os.path.join(temp_dir, "classical_separated.wav")
-            result = classical_fallback(current_path, temp_out, "vocals")
-            if result:
-                current_path = result
-                applied_methods.append("classical_separation")
+    # Fallback to classical DSP
+    fallback_used = False
+    if enhanced_path is None and fallback:
+        enhanced_path = classical_fallback(in_path, out_path)
+        fallback_used = enhanced_path is not None
     
-    # 3. Spleeter Source Separation
-    if ai_cfg.get("spleeter", {}).get("enabled", False) and "demucs" not in applied_methods:
-        if deps["spleeter"]:
-            print("[INFO] Applying Spleeter source separation...")
-            result = apply_spleeter(
-                current_path, temp_dir,
-                model=ai_cfg["spleeter"].get("model", "2stems"),
-                codec=ai_cfg["spleeter"].get("codec", "wav")
-            )
-            if result:
-                current_path = result
-                applied_methods.append("spleeter")
+    # Copy to expected location if needed
+    if enhanced_path and enhanced_path != out_path:
+        try:
+            shutil.copyfile(enhanced_path, out_path)
+            enhanced_path = out_path
+        except Exception as e:
+            print(f"[WARN] Could not copy enhanced output: {e}")
     
-    # 4. Bandwidth Extension
-    if ai_cfg.get("bandwidth_extension", {}).get("enabled", False):
-        print("[INFO] Applying bandwidth extension...")
-        temp_out = os.path.join(temp_dir, "bandwidth_extended.wav")
-        result = apply_bandwidth_extension(
-            current_path, temp_out,
-            target_sr=ai_cfg["bandwidth_extension"].get("target_sr", 48000),
-            method=ai_cfg["bandwidth_extension"].get("method", "sinc")
-        )
-        if result:
-            current_path = result
-            applied_methods.append("bandwidth_extension")
-    
-    # 5. Dereverberation
-    if ai_cfg.get("dereverb", {}).get("enabled", False):
-        print("[INFO] Applying dereverberation...")
-        temp_out = os.path.join(temp_dir, "dereverbed.wav")
-        result = apply_dereverberation(
-            current_path, temp_out,
-            room_size=ai_cfg["dereverb"].get("room_size", 0.5)
-        )
-        if result:
-            current_path = result
-            applied_methods.append("dereverberation")
-    
-    # Copy final result
-    if current_path != in_path:
-        import shutil
-        shutil.copy2(current_path, out_path)
-        print(f"[INFO] Saved enhanced audio to {out_path}")
+    elapsed = time.time() - t0
+    if enhanced_path and os.path.exists(enhanced_path):
+        print(f"[OK] AI Enhancement completed in {elapsed:.1f}s -> {enhanced_path}")
     else:
-        print("[WARN] No AI enhancements were applied")
-        # Copy input to output for pipeline continuity
-        import shutil
-        shutil.copy2(in_path, out_path)
+        print(f"[WARN] AI Enhancement failed; see logs. Elapsed {elapsed:.1f}s")
     
-    dt = time.time() - t0
+    # Determine applied methods
+    applied_methods = []
+    if demucs_done:
+        applied_methods.append("demucs")
+    if speech_enh_done:
+        applied_methods.append("speech_enhancement")
+    if fallback_used:
+        applied_methods.append("classical_fallback")
     
     # Log results
     log_data = {
@@ -511,8 +398,8 @@ def main():
         "available_dependencies": deps,
         "applied_methods": applied_methods,
         "configuration": ai_cfg,
-        "processing_time_sec": dt,
-        "fallback_used": fallback and not all(deps.values())
+        "processing_time_sec": elapsed,
+        "fallback_used": fallback_used
     }
     
     # Add instructions for enabling AI
@@ -520,12 +407,11 @@ def main():
         log_data["instructions"] = {
             "message": "No AI dependencies found. To enable AI features:",
             "steps": [
-                "1. Install optional dependencies: pip install -r ai-extras.txt",
-                "2. For Demucs: pip install demucs",
-                "3. For Spleeter: pip install spleeter",
-                "4. For SpeechBrain: pip install speechbrain",
-                "5. Enable desired features in config under 'ai_enhancement'",
-                "6. Set phase4.enabled: true in config"
+                "1. Install optional dependencies: pip install -r requirements-ai.txt",
+                "2. For Demucs: pip install -r requirements-ai.txt",
+                "3. For SpeechBrain: pip install -r requirements-ai.txt",
+                "4. Enable desired features in config under 'ai_enhancement'",
+                "5. Set phase4.enabled: true in config"
             ]
         }
     
@@ -533,7 +419,7 @@ def main():
     with open(log_path, "w") as f:
         json.dump(log_data, f, indent=2)
     
-    print(f"[INFO] Phase 4 complete in {dt:.1f}s")
+    print(f"[INFO] Phase 4 complete in {elapsed:.1f}s")
     print(f"[INFO] Applied methods: {', '.join(applied_methods) if applied_methods else 'none'}")
 
 if __name__ == "__main__":

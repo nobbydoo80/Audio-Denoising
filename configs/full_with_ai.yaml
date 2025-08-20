@@ -43,15 +43,15 @@ phases:
     name: "Quality Metrics"
 
 paths:
-  input: data/interview_jock.wav
-  noise_sample: data/evil_child.wav
+  input: /home/nobby/qzone/Audio-Denoising/data/interview_jock.wav
+  noise_sample: /home/nobby/qzone/Audio-Denoising/data/evil_child.wav
   reference: null  # Add reference if available for metrics
-  outputs_dir: outputs/stages
-  reports_dir: reports
-  logs_dir: logs
-  metrics_path: reports/metrics.json
-  manifest_path: reports/run_manifest.json
-  final_output: outputs/final_mastered.wav
+  outputs_dir: /home/nobby/qzone/Audio-Denoising/outputs/stages
+  reports_dir: /home/nobby/qzone/Audio-Denoising/reports
+  logs_dir: /home/nobby/qzone/Audio-Denoising/logs
+  metrics_path: /home/nobby/qzone/Audio-Denoising/reports/metrics.json
+  manifest_path: /home/nobby/qzone/Audio-Denoising/reports/run_manifest.json
+  final_output: /home/nobby/qzone/Audio-Denoising/outputs/final_mastered.wav
 
 # Phase 1: Analysis
 analysis:
@@ -125,22 +125,14 @@ ai_enhancement:
   enabled: true
   seed: 42
   fallback_classical: true
-  speech_enhancement:
-    enabled: true
-    model: "speechbrain/sepformer-wham"
-    device: "cpu"
-    chunk_size_sec: 10
-  demucs:
-    enabled: true
-    model: "htdemucs"
-    stems: ["vocals"]
-    device: "cpu"
-    shifts: 1
-    overlap: 0.25
-  spleeter:
-    enabled: false  # Disabled by default as Demucs is preferred
-    model: "2stems"
-    codec: "wav"
+  # Preferred: Demucs
+  demucs_model: "htdemucs"
+  demucs_shifts: 1
+  demucs_overlap: 0.25
+  device: "cpu"
+  # Optional: SpeechBrain speech enhancement (used if Demucs unavailable)
+  speechbrain_model: "speechbrain/sepformer-wham"
+  # Optional DSP helpers
   bandwidth_extension:
     enabled: true
     target_sr: 48000
@@ -219,50 +211,16 @@ mastering:
       - range: [4000, 20000]
         threshold_db: -25
         ratio: 3
-        attack_ms: 1
-        release_ms: 20
+        attack_ms: 5
+        release_ms: 50
         makeup_db: 0
-  dithering:
-    enabled: true
-    type: triangular
-    bit_depth: 16
-  profiles:
-    streaming:
-      lufs: -14
-      true_peak: -1
-      format: wav
-    podcast:
-      lufs: -16
-      true_peak: -1
-      format: wav
 
 # Metrics
 metrics:
   enabled: true
-  require_reference: false
-  snr:
-    enabled: true
-    method: segmental
-    segment_length_ms: 30
-  pesq:
-    enabled: true
-    mode: wb
-  stoi:
-    enabled: true
-    extended: true
-  sisdr:
-    enabled: true
-  spectral_distance:
-    enabled: true
-    method: lsd
-  thresholds:
-    snr_improvement_db: 15
-    pesq_min: 3.5
-    stoi_min: 0.85
-    sisdr_min: 10
-  regression:
-    enabled: true
-    tolerance_pct: 5
+  reference_required: false
+  tolerance_pct: 5
+  output_path: /home/nobby/qzone/Audio-Denoising/reports/metrics.json
 
 logging:
   level: INFO

@@ -1,6 +1,6 @@
 {
-  "input": "/home/nobby/Downloads/interview_jock.wav",
-  "output": "outputs/stages/phase2_wavelet.wav",
+  "input": "/home/nobby/qzone/Audio-Denoising/data/interview_jock.wav",
+  "output": "/home/nobby/qzone/Audio-Denoising/outputs/stages/phase2_wavelet.wav",
   "wavelet_config_note": "Uses repository defaults (db4, level=2, VisuShrink soft). Exposed level in config but current denoise.py fixes level.",
   "meta": {
     "samplerate": 44100,

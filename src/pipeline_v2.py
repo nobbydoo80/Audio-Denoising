@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Enhanced Pipeline Orchestrator v2
 Supports all phases 1-6, conditional execution, dry-run, strict mode, and run manifest
@@ -12,7 +12,7 @@ import time
 import hashlib
 import platform
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 def script_path(name: str) -> str:
     return str(Path(__file__).resolve().parent / name)
@@ -35,7 +35,7 @@ def get_system_info():
         "python_version": platform.python_version(),
         "processor": platform.processor(),
         "hostname": platform.node(),
-        "timestamp": datetime.utcnow().isoformat() + "Z"
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 def compute_file_hash(filepath):
@@ -83,7 +83,7 @@ def check_dependencies(phase, strict=False):
             pass
         
         if not ai_deps:
-            print(f"[WARN] Phase 4: No AI dependencies found. Install with: pip install -r ai-extras.txt")
+            print(f"[WARN] Phase 4: No AI dependencies found. Install with: pip install -r requirements-ai.txt")
             if strict:
                 deps_ok = False
                 missing.extend(["demucs/spleeter/speechbrain (at least one)"])
@@ -99,12 +99,12 @@ def check_dependencies(phase, strict=False):
         try:
             import pesq
         except ImportError:
-            print(f"[WARN] Metrics: pesq not found, PESQ scores will be unavailable")
+            print(f"[WARN] Metrics: pesq not found. Optional install: pip install -r requirements-metrics.txt")
         
         try:
             import pystoi
         except ImportError:
-            print(f"[WARN] Metrics: pystoi not found, STOI scores will be unavailable")
+            print(f"[WARN] Metrics: pystoi not found. Optional install: pip install -r requirements-metrics.txt")
     
     if not deps_ok and strict:
         raise RuntimeError(f"Missing required dependencies for phase {phase}: {', '.join(missing)}")
@@ -164,7 +164,7 @@ def create_run_manifest(cfg, args, phase_results):
     manifest = {
         "version": cfg.get("version", "2.0.0"),
         "run_id": f"run_{int(time.time())}",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "configuration": {
             "config_file": args.config,
             "config_hash": compute_file_hash(args.config),
@@ -287,14 +287,14 @@ def main():
         check_dependencies(1, strict)
         
         result = run_step(
-            [sys.executable, script_path("analyze_audio.py"), "--config", args.config, "--input", cfg["paths"]["input"], "--noise", cfg["paths"]["noise"]],
+            [sys.executable, script_path("analyze_audio.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase1_analyze_stdout.log"),
             dry_run
         )
         phase_results["phase1_analyze"] = result
         
         result = run_step(
-            [sys.executable, script_path("noise_profile.py"), "--config", args.config, "--noise", cfg["paths"]["noise"]],
+            [sys.executable, script_path("noise_profile.py"), "--config", args.config],
             os.path.join(cfg["paths"]["logs_dir"], "phase1_noise_profile_stdout.log"),
             dry_run
         )

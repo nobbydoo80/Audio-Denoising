@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo Audio Restoration Pipeline Setup
+echo Audio Restoration Pipeline Setup (Windows CMD)
 echo ========================================
 echo.
 
@@ -21,16 +21,15 @@ echo Upgrading pip, setuptools, and wheel first...
 python -m pip install --upgrade pip setuptools wheel
 
 echo.
-echo Installing numpy with pre-built wheel...
-python -m pip install numpy==1.26.4
-
-echo.
 echo Installing core dependencies...
-python -m pip install scipy soundfile PyYAML
+python -m pip install -r requirements.txt
 
 echo.
-echo Installing optional dependencies...
-python -m pip install matplotlib librosa
+echo Optional: install metrics extras (PESQ, STOI, LUFS)?
+echo   pip install -r requirements-metrics.txt
+
+echo Optional: install AI extras (PyTorch, Demucs, SpeechBrain)?
+echo   pip install -r requirements-ai.txt
 
 echo.
 echo ========================================
@@ -39,8 +38,9 @@ echo ========================================
 echo.
 echo To activate the environment manually, run:
 echo   .venv\Scripts\activate.bat
-echo.
+
 echo Then run the pipeline with:
-echo   python src/pipeline_v2.py --config configs/full_no_ai.yaml --phases all
+echo   python src\pipeline_v2.py --config configs\full_no_ai.yaml --phases all
+
 echo.
 pause

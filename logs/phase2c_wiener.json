@@ -1,6 +1,6 @@
 {
-  "input": "outputs/stages/phase2b_spectral_subtract.wav",
-  "output": "outputs/stages/phase2c_wiener.wav",
+  "input": "/home/nobby/qzone/Audio-Denoising/outputs/stages/phase2b_spectral_subtract.wav",
+  "output": "/home/nobby/qzone/Audio-Denoising/outputs/stages/phase2c_wiener.wav",
   "n_fft": 2048,
   "hop_length": 512,
   "median_kernel_bins": 5,

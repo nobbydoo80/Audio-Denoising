@@ -1,19 +1,19 @@
 
-0it [00:00, ?it/s]C:\ProgramData\anaconda3\Lib\site-packages\pywt\_multilevel.py:43: UserWarning: Level value of 2 is too high: all coefficients will experience boundary effects.
+0it [00:00, ?it/s]/home/nobby/qzone/Audio-Denoising/.venv310/lib/python3.10/site-packages/pywt/_multilevel.py:43: UserWarning: Level value of 2 is too high: all coefficients will experience boundary effects.
   warnings.warn(
 
-1it [00:00,  1.48it/s]
-2it [00:01,  1.50it/s]
-3it [00:02,  1.46it/s]
-4it [00:02,  1.45it/s]
-5it [00:03,  1.44it/s]
-6it [00:04,  1.46it/s]
-7it [00:04,  1.46it/s]
-8it [00:05,  1.46it/s]
-9it [00:06,  1.47it/s]
-10it [00:06,  1.43it/s]
-11it [00:06,  1.59it/s]
-Phase 2 (Wavelet) complete -> outputs/stages\phase2_wavelet.wav
+1it [00:00,  1.02it/s]
+2it [00:02,  1.04s/it]
+3it [00:03,  1.14s/it]
+4it [00:04,  1.14s/it]
+5it [00:05,  1.09s/it]
+6it [00:06,  1.03s/it]
+7it [00:07,  1.00s/it]
+8it [00:08,  1.09s/it]
+9it [00:09,  1.10s/it]
+10it [00:10,  1.10s/it]
+11it [00:10,  1.02it/s]
+Phase 2 (Wavelet) complete -> /home/nobby/qzone/Audio-Denoising/outputs/stages/phase2_wavelet.wav
 
-[elapsed_sec]: 9.201
+[elapsed_sec]: 12.376
 [returncode]: 0

@@ -8,7 +8,7 @@ A comprehensive 6-phase audio restoration pipeline for removing persistent backg
   1. **Analysis & Noise Profiling**: Spectral analysis, VAD, child-band detection
   2. **Primary Noise Reduction**: Wavelet denoising, spectral subtraction, Wiener filtering
   3. **HPSS**: Harmonic-Percussive Source Separation
-  4. **AI Enhancement** (Optional): Demucs, Spleeter, SpeechBrain integration
+  4. **AI Enhancement** (Optional): Demucs, SpeechBrain integration
   5. **Artifact Control**: Click removal, musical noise suppression, phase coherence
   6. **Mastering**: LUFS normalization, true-peak limiting, multiband compression
 
@@ -29,13 +29,16 @@ A comprehensive 6-phase audio restoration pipeline for removing persistent backg
 git clone <repository>
 cd Audio-Denoising
 
-# Install minimal dependencies
-pip install -r requirements.txt
-pip install pyyaml
+# Create/activate a Python 3.10+ virtualenv as you like
 
-# Optional: Install AI dependencies
-pip install -r ai-extras.txt
-pip install demucs spleeter  # For AI source separation
+# Install core (classical DSP) dependencies only
+pip install -r requirements.txt
+
+# Optional: metrics (PESQ/STOI/LUFS)
+pip install -r requirements-metrics.txt
+
+# Optional: AI (Demucs/SpeechBrain). For CUDA wheels, follow pytorch.org
+pip install -r requirements-ai.txt
 ```
 
 ### 2. Basic Usage
@@ -48,7 +51,6 @@ make run-core INPUT=jock_itntvw.wav NOISE=evilhild_2.wav
 make run-full
 
 # Run complete pipeline with AI (all phases)
-make install-ai  # First time only
 make run-ai
 ```
 
@@ -76,7 +78,7 @@ Three pre-configured profiles are provided:
 - Phases 1-2 only
 - Basic wavelet denoising + spectral methods
 - Fastest processing
-- No external dependencies
+- No external AI dependencies
 
 ### 2. `configs/full_no_ai.yaml`
 - All phases except AI (Phase 4 disabled)
@@ -86,9 +88,8 @@ Three pre-configured profiles are provided:
 
 ### 3. `configs/full_with_ai.yaml`
 - All phases including AI enhancement
-- Demucs/Spleeter for source separation
-- Speech enhancement with SpeechBrain
-- Requires `ai-extras.txt` installation
+- Demucs/SpeechBrain for source separation
+- Requires `requirements-ai.txt` installation
 
 ### 4. `configs/full_pipeline.yaml`
 - Complete configuration reference
@@ -138,7 +139,6 @@ python src/hpss_separate.py --config <config>
 python src/ai_separate.py --config <config>
 ```
 - **Demucs**: Neural source separation
-- **Spleeter**: Fast vocal isolation
 - **SpeechBrain**: Speech enhancement
 - Falls back to classical methods if unavailable
 
@@ -198,19 +198,7 @@ python src/pipeline_v2.py --config configs/full_no_ai.yaml --strict
 ### Custom Phase Selection
 Run specific phases:
 ```bash
-# Only analysis and HPSS
-python src/pipeline_v2.py --config configs/full_no_ai.yaml --phases 1,3
-
-# Skip mastering
-python src/pipeline_v2.py --config configs/full_no_ai.yaml --phases 1,2,3,4,5,metrics
-```
-
-### Override Inputs
-```bash
-python src/pipeline_v2.py --config configs/full_no_ai.yaml \
-    --input my_audio.wav \
-    --noise my_noise.wav \
-    --reference clean_reference.wav
+python src/pipeline_v2.py --config configs/full_no_ai.yaml --phases 1,3,5
 ```
 
 ## Output Structure

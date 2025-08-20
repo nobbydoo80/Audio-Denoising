@@ -1,35 +1,37 @@
 {
   "version": "2.0.0",
-  "run_id": "run_1755460254",
-  "timestamp": "2025-08-17T19:50:54.434993Z",
+  "run_id": "run_1755676489",
+  "timestamp": "2025-08-20T07:54:49.759825Z",
   "configuration": {
     "config_file": "/home/nobby/qzone/Audio-Denoising/configs/full_no_ai.yaml",
     "config_hash": "cf5cd38bbc306294268cfe7f73dce79caf67054c44ec83027db093a08a057e87",
     "seed": 42,
-    "phases_requested": [],
+    "phases_requested": [
+      "all"
+    ],
     "dry_run": true,
     "strict_mode": false
   },
   "inputs": {
     "audio": {
       "path": "data/interview_jock.wav",
-      "hash": null
+      "hash": "041aebde878d85d789f747aeef95df98cd3ccd0c3481a12a86acdf4cd2929b4f"
     },
     "noise": {
       "path": "data/evil_child.wav",
-      "hash": null
+      "hash": "afba664344670c273a1ea25768e73ef37fa88dc750c128e9b218498af8285233"
     }
   },
   "system": {
-    "platform": "Linux-6.14.0-27-generic-x86_64-with-glibc2.41",
-    "python_version": "3.13.5",
+    "platform": "Linux-6.14.0-28-generic-x86_64-with-glibc2.41",
+    "python_version": "3.13.3",
     "processor": "x86_64",
     "hostname": "nobby-hpprobook640g1",
-    "timestamp": "2025-08-17T19:50:54.454597Z"
+    "timestamp": "2025-08-20T07:54:52.603188Z"
   },
   "git": {
     "branch": "main",
-    "commit": "2698179e"
+    "commit": "2ea2da27"
   },
   "phases": {
     "phase1_analyze": {
@@ -62,6 +64,11 @@
       "elapsed": 0,
       "returncode": 0
     },
+    "phase4_ai": {
+      "status": "dry-run",
+      "elapsed": 0,
+      "returncode": 0
+    },
     "phase5_artifact": {
       "status": "dry-run",
       "elapsed": 0,
@@ -78,7 +85,13 @@
       "returncode": 0
     }
   },
-  "outputs": {},
+  "outputs": {
+    "final": {
+      "path": "outputs/final_mastered.wav",
+      "hash": "6b08474479e99b497b943eebfcdde01226f63a3056fdfa7a61f5cf3dd5a98767",
+      "size_bytes": 42727468
+    }
+  },
   "metrics": {},
   "total_elapsed_sec": 0
 }

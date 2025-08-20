@@ -1,8 +1,9 @@
 # Audio Restoration Pipeline - Full Phases 1-6
 # Usage:
 #   make help         # Show all targets
-#   make install      # Install minimal dependencies
-#   make install-ai   # Install AI extras
+#   make install      # Install core dependencies
+#   make install-ai   # Install AI extras (PyTorch, Demucs, SpeechBrain)
+#   make install-metrics # Install metrics extras (PESQ, STOI, LUFS)
 #   make run-core     # Run phases 1-2 only
 #   make run-full     # Run all phases (no AI)
 #   make run-ai       # Run all phases with AI
@@ -29,14 +30,15 @@ PROFILE?=streaming
 STRICT?=false
 DRY_RUN?=false
 
-.PHONY: help install install-ai run-core run-full run-ai dry-run test clean
+.PHONY: help install install-ai install-metrics run-core run-full run-ai dry-run test clean
 
 help:
 	@echo "Audio Restoration Pipeline - Make Targets"
 	@echo "========================================="
 	@echo "Setup:"
-	@echo "  make install      - Install minimal dependencies"
-	@echo "  make install-ai   - Install AI extras (demucs, spleeter, etc.)"
+	@echo "  make install         - Install core dependencies"
+	@echo "  make install-ai      - Install AI extras (PyTorch, Demucs, SpeechBrain)"
+	@echo "  make install-metrics - Install metrics extras (PESQ, STOI, LUFS)"
 	@echo ""
 	@echo "Run Pipeline:"
 	@echo "  make run-core     - Run phases 1-2 only (basic denoising)"
@@ -64,18 +66,17 @@ help:
 install:
 	$(PY) -m pip install --upgrade pip
 	$(PY) -m pip install -r requirements.txt
-	$(PY) -m pip install pyyaml  # Ensure YAML support
-	@echo "Minimal dependencies installed."
+	@echo "Core dependencies installed."
 	@echo "For AI features, run: make install-ai"
+	@echo "For metrics, run: make install-metrics"
 
 install-ai:
-	$(PY) -m pip install -r ai-extras.txt
-	@echo "Installing Demucs (may take time)..."
-	$(PY) -m pip install demucs
-	@echo "Installing Spleeter..."
-	$(PY) -m pip install spleeter
-	@echo "AI dependencies installed."
-	@echo "For GPU support, install PyTorch with CUDA separately."
+	$(PY) -m pip install -r requirements-ai.txt
+	@echo "AI dependencies installed. For GPU support, install PyTorch with CUDA per pytorch.org."
+
+install-metrics:
+	$(PY) -m pip install -r requirements-metrics.txt
+	@echo "Metrics dependencies installed."
 
 run-core:
 	$(PY) src/pipeline_v2.py --config $(CFG_CORE) \
